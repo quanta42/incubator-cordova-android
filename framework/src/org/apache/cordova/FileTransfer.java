@@ -436,7 +436,7 @@ public class FileTransfer extends Plugin {
      * @param target      	Full path of the file on the file system
      * @return JSONObject 	the downloaded file
      */
-    private PluginResult download(String source, String target) {
+    private PluginResult download(String source, String target, JSONObject params) {
         Log.d(LOG_TAG, "download " + source + " to " +  target);
 
         HttpURLConnection connection = null;
@@ -452,6 +452,18 @@ public class FileTransfer extends Plugin {
               URL url = new URL(source);
               connection = (HttpURLConnection) url.openConnection();
               connection.setRequestMethod("GET");
+              
+              // Handle headers
+              try {
+                    JSONObject headers = params.getJSONObject("headers");
+                    for (Iterator iter = headers.keys(); iter.hasNext();)
+                    {
+                        String headerKey = iter.next().toString();
+                        connection.setRequestProperty(headerKey, headers.getString(headerKey));
+                    }
+              } catch (JSONException e1) {
+                    // No headers to be manipulated!
+              }
               
               //Add cookie support
               String cookie = CookieManager.getInstance().getCookie(source);
